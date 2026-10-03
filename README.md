@@ -1,5 +1,7 @@
 # ArahMPU6050
 
+[English](README.en.md)
+
 Library Arduino berbahasa Indonesia untuk melacak **arah hadap (heading)** memakai IMU **MPU6050**: arah 0–360°, mata angin, selisih ke sudut tujuan, kecepatan putar, dan kemiringan.
 
 Cocok untuk robot yang perlu berbelok dengan sudut tepat, line follower, robot KRSRI/KRI, odometri, penanda arah kendaraan, gimbal sederhana, dan sejenisnya.
