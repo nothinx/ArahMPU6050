@@ -9,8 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: arduino/arduino-lint-action@v1
         with:
-          # Ganti ke "update" setelah library diterima di Library Manager.
-          library-manager: submit
+          library-manager: update
           compliance: strict
 
   compile:
