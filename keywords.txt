@@ -1,0 +1,25 @@
+#######################################
+# ArahMPU6050
+#######################################
+
+ArahMPU6050	KEYWORD1
+
+mulai	KEYWORD2
+kalibrasi	KEYWORD2
+perbarui	KEYWORD2
+arah	KEYWORD2
+mataAngin	KEYWORD2
+mataAnginSingkat	KEYWORD2
+selisihKe	KEYWORD2
+sudutTotal	KEYWORD2
+resetArah	KEYWORD2
+aturArah	KEYWORD2
+kecepatanPutar	KEYWORD2
+diam	KEYWORD2
+kemiringanDepan	KEYWORD2
+kemiringanSamping	KEYWORD2
+aturRentangGyro	KEYWORD2
+aturAmbangDiam	KEYWORD2
+aturKoreksiOtomatis	KEYWORD2
+aturFaktorSkala	KEYWORD2
+faktorSkala	KEYWORD2
