@@ -28,6 +28,14 @@ jobs:
             platforms: |
               - name: esp32:esp32
                 source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          - fqbn: esp32:esp32:esp32c3
+            platforms: |
+              - name: esp32:esp32
+                source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          - fqbn: esp32:esp32:esp32s3
+            platforms: |
+              - name: esp32:esp32
+                source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
           - fqbn: STMicroelectronics:stm32:GenF4:pnum=BLACKPILL_F411CE
             platforms: |
               - name: STMicroelectronics:stm32
@@ -45,3 +53,11 @@ jobs:
           libraries: |
             - source-path: ./
           enable-warnings-report: true
+
+  uji-logika:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Uji logika di PC
+        working-directory: extras/test
+        run: g++ -std=c++11 -Wall -Wextra -Werror -I. -I../../src uji.cpp ../../src/ArahMPU6050.cpp -o uji && ./uji
