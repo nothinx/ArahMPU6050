@@ -5,7 +5,7 @@
 // magnetometer, jadi 0 derajat = arah saat mulai() atau resetArah().
 //
 // - Sampling tetap 100 Hz lewat FIFO sensor: loop() yang lambat tidak membuat
-//   putaran hilang, asal perbarui() dipanggil minimal tiap ~0.8 detik.
+//   putaran hilang, asal perbarui() dipanggil minimal tiap ~1.5 detik (FIFO 1024 byte = 1.7 detik).
 // - Kompensasi kemiringan: sensor boleh miring atau dipasang tegak.
 // - Bias gyro dikoreksi otomatis setiap sensor diam >= 1 detik.
 #pragma once
@@ -59,7 +59,7 @@ public:
   float faktorSkala() const { return _skala; }
 
 private:
-  void proses(const uint8_t *p);
+  void proses(const uint8_t *p, float dps); // dps = derajat/detik per LSB
   void bacaAkselerasi(float alfa);
   void resetFifo();
   bool baca(uint8_t reg, uint8_t *buf, uint8_t n);

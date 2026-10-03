@@ -16,6 +16,7 @@ static uint8_t indeksMataAngin(float a) { return (uint8_t)((a + 22.5f) / 45.0f) 
 static int16_t be16(const uint8_t *p) { return (int16_t)((p[0] << 8) | p[1]); }
 
 static float bungkus360(float d) {
+  if (d >= 0 && d < 360.0f) return d; // paling sering: tanpa fmodf()
   d = fmodf(d, 360.0f);
   return d < 0 ? d + 360.0f : d;
 }
@@ -81,22 +82,23 @@ bool ArahMPU6050::perbarui() {
   if (n == 0) return true;
 
   bacaAkselerasi(0.2f);
+  const float dps = _skala / _lsb; // derajat/detik per LSB, dihitung sekali per perbarui()
   uint8_t buf[POTONGAN];
   while (n) {
     uint8_t k = n > POTONGAN ? POTONGAN : n;
     if (!baca(0x74, buf, k)) return false;
-    for (uint8_t i = 0; i < k; i += BYTE_SAMPEL) proses(buf + i);
+    for (uint8_t i = 0; i < k; i += BYTE_SAMPEL) proses(buf + i, dps);
     n -= k;
   }
   return true;
 }
 
-void ArahMPU6050::proses(const uint8_t *p) {
+void ArahMPU6050::proses(const uint8_t *p, float dps) {
   float mentah[3], w[3];
   bool tenang = true;
   for (uint8_t s = 0; s < 3; s++) {
     mentah[s] = be16(p + 2 * s);
-    w[s] = (mentah[s] - _bias[s]) / _lsb * _skala;
+    w[s] = (mentah[s] - _bias[s]) * dps;
     if (fabsf(w[s]) >= _ambang) tenang = false;
   }
 
