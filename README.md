@@ -94,6 +94,21 @@ cd extras/simulasi
 python gambar.py   # butuh g++ dan matplotlib
 ```
 
+## Kecepatan & memori
+
+Diukur dengan simavr (simulator ATmega328P yang akurat per siklus) di Arduino Uno 16 MHz. Simulator tidak punya MPU6050, jadi yang diukur adalah pengolahan satu sampel FIFO (`proses()` di dalam `perbarui()`); waktu I2C bergantung pada bus dan bisa diukur di board sungguhan dengan sketch `extras/benchmark/ArahMPU6050Benchmark`.
+
+| Per sampel gyro (100 per detik) | 1.0.2 | 1.0.1 |
+|---|---|---|
+| Sedang berputar | 2.338 siklus (146 µs) | 3.855 (241 µs) |
+| Diam (koreksi bias otomatis) | 1.881 (118 µs) | 2.169 (136 µs) |
+| Beban CPU di Uno | ±1,5% | ±2,4% |
+| RAM per objek | 55 B | 55 B |
+
+`perbarui()` O(n) untuk n sampel yang menumpuk di FIFO (paling banyak 170), memori O(1) (buffer 30 byte di stack). Di 1.0.2 faktor derajat/detik per LSB dihitung sekali per `perbarui()`, bukan tiga pembagian float per sampel, dan pembungkusan 0..360 tidak memanggil `fmodf()` kecuali arah melewati 0/360. Hasil uji `extras/test` dan grafik simulasi tidak berubah.
+
+Pesaing (MPU6050_light, Adafruit MPU6050, dll.) membaca register sesaat, bukan FIFO, jadi beban kerjanya tidak setara dan tidak dibandingkan di sini; bedanya ada di [Hasil simulasi](#hasil-simulasi).
+
 ## Referensi fungsi
 
 ### Dasar
@@ -102,7 +117,7 @@ python gambar.py   # butuh g++ dan matplotlib
 |---|---|
 | `bool mulai(TwoWire &wire = Wire, uint8_t alamat = 0x68)` | Menyalakan sensor. `false` jika sensor tidak menjawab. |
 | `bool kalibrasi(uint16_t sampel = 500)` | Mengukur bias gyro (±1 detik). Sensor harus diam; `false` jika bergerak. |
-| `bool perbarui()` | Panggil di `loop()`, minimal tiap ±0,8 detik. `false` jika ada data hilang atau sensor tidak menjawab. |
+| `bool perbarui()` | Panggil di `loop()`, minimal tiap ±1,5 detik (FIFO sensor menampung ±1,7 detik). `false` jika ada data hilang atau sensor tidak menjawab. |
 
 ### Arah
 
@@ -155,7 +170,7 @@ python gambar.py   # butuh g++ dan matplotlib
 1. **Kalibrasi saat sensor benar-benar diam**, sebaiknya setelah sensor menyala ±10 detik agar suhunya stabil.
 2. **Jalankan `KalibrasiSkala` sekali** per modul, lalu simpan faktornya di program.
 3. **Pasang sensor kokoh.** Getaran motor yang merambat ke sensor menambah drift; beri peredam (busa/karet) jika perlu.
-4. **Panggil `perbarui()` sesering mungkin**, minimal tiap ±0,8 detik.
+4. **Panggil `perbarui()` sesering mungkin**, minimal tiap ±1,5 detik (FIFO sensor menampung ±1,7 detik).
 5. **Kabel I2C panjang atau tidak stabil?** Panggil `Wire.setClock(100000);` setelah `mulai()`.
 
 ## Batasan
@@ -163,6 +178,15 @@ python gambar.py   # butuh g++ dan matplotlib
 - Arah bersifat relatif dan akan drift seiring waktu. Untuk arah utara yang absolut dan stabil, tambahkan magnetometer (mis. QMC5883L/HMC5883L).
 - Kemiringan dihitung dari akselerometer saja, sehingga kurang akurat saat sensor berakselerasi kuat.
 - Satu objek `ArahMPU6050` memakai FIFO sensor; jangan memakai library MPU6050 lain pada sensor yang sama secara bersamaan.
+
+## Pengujian
+
+Mulai/kalibrasi, belokan kanan-kiri, `perbarui()` tiap 1,5 detik tanpa kehilangan putaran, FIFO meluap pada 2 detik, sensor miring 30°, koreksi bias saat diam, `aturArah()`, `selisihKe()`, dan rentang gyro diuji otomatis di PC dengan MPU6050 tiruan di level register (`extras/test`) setiap ada perubahan:
+
+```sh
+cd extras/test
+g++ -std=c++11 -I. -I../../src uji.cpp ../../src/ArahMPU6050.cpp -o uji && ./uji
+```
 
 ## Lisensi
 

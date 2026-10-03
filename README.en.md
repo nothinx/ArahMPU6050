@@ -63,13 +63,25 @@ cd extras/simulasi
 python gambar.py   # needs g++ and matplotlib
 ```
 
+## Speed & memory
+
+Measured with simavr (cycle-accurate ATmega328P simulator), Arduino Uno 16 MHz. The simulator has no MPU6050, so this is the CPU cost of one FIFO sample; I2C time can be measured on real hardware with `extras/benchmark/ArahMPU6050Benchmark`.
+
+| Per gyro sample (100/s) | 1.0.2 | 1.0.1 |
+|---|---|---|
+| Turning | 2,338 cycles (146 µs) | 3,855 (241 µs) |
+| Still (auto bias correction) | 1,881 (118 µs) | 2,169 (136 µs) |
+| RAM per object | 55 B | 55 B |
+
+Since 1.0.2 the degrees-per-LSB factor is computed once per `perbarui()` instead of three float divisions per sample. Logic tests: `extras/test` (`g++ -std=c++11 -I. -I../../src uji.cpp ../../src/ArahMPU6050.cpp -o uji && ./uji`).
+
 ## Function reference
 
 | Indonesian | English | Notes |
 |---|---|---|
 | `mulai(TwoWire &wire = Wire, uint8_t alamat = 0x68)` | begin(wire, address) | `false` if the sensor does not respond |
 | `kalibrasi(uint16_t sampel = 500)` | calibrate(samples) | ≈1 s, sensor must be still; `false` if it moved |
-| `perbarui()` | update | call in `loop()`, at least every ≈0.8 s; `false` if data was lost |
+| `perbarui()` | update | call in `loop()`, at least every ≈1.5 s (the sensor FIFO holds ≈1.7 s); `false` if data was lost |
 | `arah()` | heading | 0–360°, clockwise |
 | `mataAngin()` | compass point | `"Utara"` (north), `"Timur Laut"` (NE), `"Timur"` (E), `"Tenggara"` (SE), `"Selatan"` (S), `"Barat Daya"` (SW), `"Barat"` (W), `"Barat Laut"` (NW) |
 | `mataAnginSingkat()` | short compass point | `"U"`, `"TL"`, `"T"`, `"TG"`, `"S"`, `"BD"`, `"B"`, `"BL"` |
