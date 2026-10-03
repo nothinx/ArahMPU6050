@@ -72,6 +72,28 @@ void loop() {
 }
 ```
 
+## Hasil simulasi
+
+> Grafik di bawah adalah **simulasi dengan sensor tiruan**, bukan pengukuran MPU6050 sungguhan. Kode library asli berjalan di PC dan membaca MPU6050 tiruan (`extras/test/Wire.h`) yang meniru register dan FIFO 100 Hz sensor, dengan gerakan sintetis, bias gyro, dan noise. Low-pass filter sensor dan getaran nyata tidak ditiru.
+
+![Grafik sudut terhadap waktu: hasil library berimpit dengan arah sebenarnya saat belok 90° kanan lalu 180° kiri](extras/gambar/arah_belok.svg)
+
+Belok 90° ke kanan, diam, lalu 180° ke kiri: hasil library berimpit dengan arah sebenarnya, dan `arah()` berakhir di Barat.
+
+![Grafik selisih arah selama 10 menit: tanpa koreksi bias, arah melenceng makin jauh; dengan koreksi otomatis tetap dekat nol](extras/gambar/arah_koreksi_bias.svg)
+
+Bias gyro dibuat bergeser perlahan selama 10 menit (seperti sensor yang menghangat) sementara sensor lebih sering diam. Dengan `aturKoreksiOtomatis(true)` (default), bias diperbarui setiap sensor diam, sehingga arah hampir tidak melenceng.
+
+![Grafik sudut dengan loop 300 ms: perbarui() mengikuti arah sebenarnya, membaca gyro sesaat meleset jauh](extras/gambar/arah_loop_lambat.svg)
+
+`loop()` dengan `delay(300)` dan belokan cepat 0,4–0,8 detik. `perbarui()` membaca semua sampel 100 Hz dari FIFO, jadi tidak ada putaran yang hilang. Pembandingnya (merah) memakai sensor dan loop yang sama, tapi membaca register gyro sesaat tiap 300 ms lalu mengalikannya dengan 0,3 detik. Besar melesetnya bergantung pada kapan sampel jatuh; untuk belokan yang lebih pelan selisihnya lebih kecil.
+
+Grafik dibuat dari simulasi di PC yang menjalankan kode library ini (`extras/simulasi`):
+```sh
+cd extras/simulasi
+python gambar.py   # butuh g++ dan matplotlib
+```
+
 ## Referensi fungsi
 
 ### Dasar

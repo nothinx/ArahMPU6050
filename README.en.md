@@ -41,6 +41,28 @@ void loop() {
 
 Compiles on Uno/Nano, Mega, ESP32, ESP32-C3/S3, STM32 Blackpill F411, and Bluepill F103 (STM32duino core).
 
+## Simulation results
+
+> These plots are **simulations with an emulated sensor**, not measurements of a real MPU6050. The real library code runs on a PC against an emulated MPU6050 (`extras/test/Wire.h`) that mimics the sensor's registers and 100 Hz FIFO, with synthetic motion, gyro bias, and noise.
+
+![Angle over time: the library output matches the true heading through a 90° right turn and a 180° left turn](extras/gambar/arah_belok.svg)
+
+A 90° right turn, then a 180° left turn: the library output matches the true heading.
+
+![Heading error over 10 minutes: without bias correction the error keeps growing; with automatic correction it stays near zero](extras/gambar/arah_koreksi_bias.svg)
+
+The gyro bias drifts slowly for 10 minutes (as a warming sensor would) while the sensor is mostly still. With `aturKoreksiOtomatis(true)` (automatic correction, the default) the heading barely drifts.
+
+![Angle with a 300 ms loop: perbarui() follows the true heading, reading the instantaneous gyro rate drifts far off](extras/gambar/arah_loop_lambat.svg)
+
+A `loop()` with `delay(300)` and fast 0.4–0.8 s turns. `perbarui()` reads every 100 Hz sample from the FIFO, so no rotation is lost. The red line uses the same sensor and loop but reads the instantaneous gyro register every 300 ms and multiplies it by 0.3 s; its error depends on sample timing and is smaller for slower turns.
+
+To regenerate:
+```sh
+cd extras/simulasi
+python gambar.py   # needs g++ and matplotlib
+```
+
 ## Function reference
 
 | Indonesian | English | Notes |
